@@ -26,12 +26,12 @@ Belum ada koneksi database atau API. Semua data hardcoded.
 - [x] Pemupukan — lib/features/pemupukan/pemupukan_screen.dart (Section 15)
 - [x] Panen — lib/features/panen/panen_screen.dart (Section 16)
 - [x] Perawatan — lib/features/perawatan/perawatan_screen.dart (Section 17)
+- [x] Catatan Lapangan — lib/features/catatan_lapangan/catatan_lapangan_screen.dart (Section 18)
+- [x] Laporan — lib/features/laporan/laporan_screen.dart (Section 19)
+- [x] Pengaturan — lib/features/pengaturan/pengaturan_screen.dart (Section 21)
+- [x] Aktivasi Lisensi — lib/features/lisensi/lisensi_screen.dart (Section 22)
 
 ### BELUM
-- [ ] Catatan Lapangan — lib/features/catatan_lapangan/catatan_lapangan_screen.dart (Section 18)
-- [ ] Laporan — lib/features/laporan/laporan_screen.dart (Section 19)
-- [ ] Pengaturan — lib/features/pengaturan/pengaturan_screen.dart (Section 21)
-- [ ] Aktivasi Lisensi — lib/features/lisensi/lisensi_screen.dart (Section 22)
 
 ## Perintah Task Siap Pakai
 
@@ -103,3 +103,47 @@ Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
 - Guard divide-by-zero sebelum semua operasi bagi (BUG 6)
 - Flutter TIDAK BOLEH akses tabel licenses langsung
 - Lisensi via Supabase RPC activate_license() — format key TSM-0001
+
+## Routing & Navigasi
+### Setup Selesai
+- **lib/main.dart**: Entry point dengan ProviderScope (Riverpod)
+- **lib/app.dart**: MaterialApp.router dengan go_router configuration
+- **lib/shared/widgets/sidebar.dart**: Sidebar navigasi dengan menu ke semua halaman
+
+### Route Configuration (go_router)
+- `/lisensi` → LisensiScreen (halaman awal)
+- `/beranda` → BerandaScreen
+- `/daftar-lahan` → DaftarLahanScreen
+- `/stok-produk` → StokProdukScreen
+- `/semprot` → SemprotScreen
+- `/pemupukan` → PemupukanScreen
+- `/panen` → PanenScreen
+- `/perawatan` → PerawatanScreen
+- `/catatan-lapangan` → CatatanLapanganScreen
+- `/laporan` → LaporanScreen
+- `/pengaturan` → PengaturanScreen
+
+### Dependencies Terinstall
+- flutter_riverpod: ^2.4.9 (State management)
+- go_router: ^13.0.0 (Routing)
+- supabase_flutter: ^2.3.4 (Supabase integration)
+- flutter_secure_storage: ^9.0.0 (Secure storage)
+- device_info_plus: ^10.0.1 (Device info)
+- flutter_local_notifications: ^17.0.0 (Local notifications)
+- local_auth: ^2.1.8 (Biometrics)
+- dio: ^5.4.0 (HTTP client)
+- fl_chart: ^0.68.0 (Charts)
+- excel: ^4.0.3 (Excel export)
+- pdf: ^3.10.7 (PDF generation)
+- printing: ^5.11.1 (PDF printing)
+- share_plus: ^9.0.0 (Share functionality)
+- file_picker: ^8.0.0 (File picker)
+- path_provider: ^2.1.1 (Path provider)
+- url_launcher: ^6.2.2 (URL launcher)
+- intl: ^0.19.0 (Internationalization)
+- screenshot: ^2.1.0 (Screenshot)
+
+### Catatan Run
+- Flutter analyze: No errors (hanya lint warnings)
+- Flutter run: Memerlukan Developer Mode di Windows (system requirement)
+- Code sudah siap untuk dijalankan setelah enable Developer Mode
