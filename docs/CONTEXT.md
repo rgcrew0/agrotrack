@@ -21,9 +21,9 @@ Belum ada koneksi database atau API. Semua data hardcoded.
 ### SELESAI
 - [x] Beranda — lib/features/beranda/beranda_screen.dart (Section 11)
 - [x] Daftar Lahan — lib/features/daftar_lahan/daftar_lahan_screen.dart (Section 12)
+- [x] Stok & Notif Produk — lib/features/stok_produk/stok_produk_screen.dart (Section 13)
 
 ### BELUM
-- [ ] Stok & Notif Produk — lib/features/stok_produk/stok_produk_screen.dart (Section 15)
 - [ ] Semprot — lib/features/semprot/semprot_screen.dart (Section 13)
 - [ ] Pemupukan — lib/features/pemupukan/pemupukan_screen.dart (Section 14)
 - [ ] Panen — lib/features/panen/panen_screen.dart (Section 16)
