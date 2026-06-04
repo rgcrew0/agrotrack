@@ -24,10 +24,10 @@ Belum ada koneksi database atau API. Semua data hardcoded.
 - [x] Stok & Notif Produk — lib/features/stok_produk/stok_produk_screen.dart (Section 13)
 - [x] Semprot — lib/features/semprot/semprot_screen.dart (Section 14)
 - [x] Pemupukan — lib/features/pemupukan/pemupukan_screen.dart (Section 15)
+- [x] Panen — lib/features/panen/panen_screen.dart (Section 16)
+- [x] Perawatan — lib/features/perawatan/perawatan_screen.dart (Section 17)
 
 ### BELUM
-- [ ] Panen — lib/features/panen/panen_screen.dart (Section 16)
-- [ ] Perawatan — lib/features/perawatan/perawatan_screen.dart (Section 17)
 - [ ] Catatan Lapangan — lib/features/catatan_lapangan/catatan_lapangan_screen.dart (Section 18)
 - [ ] Laporan — lib/features/laporan/laporan_screen.dart (Section 19)
 - [ ] Pengaturan — lib/features/pengaturan/pengaturan_screen.dart (Section 21)
