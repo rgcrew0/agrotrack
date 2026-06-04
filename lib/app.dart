@@ -15,10 +15,67 @@ import 'features/semprot/semprot_screen.dart';
 import 'features/stok_produk/stok_produk_screen.dart';
 import 'shared/widgets/sidebar.dart';
 
+// Placeholder screens for routes not yet implemented
+class HistoryScreen extends StatelessWidget {
+  const HistoryScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF2b322d),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2b322d),
+        title: const Text('History', style: TextStyle(color: Color(0xFFe0e0e0))),
+      ),
+      drawer: const Sidebar(),
+      body: const Center(
+        child: Text('History - Coming Soon', style: TextStyle(color: Color(0xFFe0e0e0))),
+      ),
+    );
+  }
+}
+
+class KeranjangSampahScreen extends StatelessWidget {
+  const KeranjangSampahScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF2b322d),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2b322d),
+        title: const Text('Keranjang Sampah', style: TextStyle(color: Color(0xFFe0e0e0))),
+      ),
+      drawer: const Sidebar(),
+      body: const Center(
+        child: Text('Keranjang Sampah - Coming Soon', style: TextStyle(color: Color(0xFFe0e0e0))),
+      ),
+    );
+  }
+}
+
+class ModalPraTanamScreen extends StatelessWidget {
+  const ModalPraTanamScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF2b322d),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2b322d),
+        title: const Text('Modal Pra-Tanam', style: TextStyle(color: Color(0xFFe0e0e0))),
+      ),
+      drawer: const Sidebar(),
+      body: const Center(
+        child: Text('Modal Pra-Tanam - Coming Soon', style: TextStyle(color: Color(0xFFe0e0e0))),
+      ),
+    );
+  }
+}
+
 // GoRouter configuration
+// NOTE: Initial location set to '/beranda' for Tahap 1 testing
+// Will be changed back to '/lisensi' in Tahap 3
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/lisensi',
+    initialLocation: '/beranda',
     routes: [
       GoRoute(
         path: '/lisensi',
@@ -74,6 +131,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pengaturan',
         name: 'pengaturan',
         builder: (context, state) => const PengaturanScreen(),
+      ),
+      GoRoute(
+        path: '/history',
+        name: 'history',
+        builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: '/keranjang-sampah',
+        name: 'keranjang-sampah',
+        builder: (context, state) => const KeranjangSampahScreen(),
+      ),
+      GoRoute(
+        path: '/modal-pra-tanam',
+        name: 'modal-pra-tanam',
+        builder: (context, state) => const ModalPraTanamScreen(),
       ),
     ],
   );

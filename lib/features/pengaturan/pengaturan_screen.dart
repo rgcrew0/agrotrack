@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../shared/widgets/sidebar.dart';
 
 class PengaturanScreen extends StatefulWidget {
   const PengaturanScreen({super.key});
@@ -113,7 +114,7 @@ class _PengaturanScreenState extends State<PengaturanScreen> {
           ),
         ],
       ),
-      drawer: _buildSidebar(),
+      drawer: const Sidebar(),
     );
   }
 
@@ -655,112 +656,6 @@ class _PengaturanScreenState extends State<PengaturanScreen> {
               foregroundColor: const Color(0xffffffff),
             ),
             child: const Text('Ya, Keluar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSidebar() {
-    return Drawer(
-      backgroundColor: const Color(0xff2b322d),
-      child: ListView(
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xff44425c),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'AgroTrack',
-                  style: TextStyle(
-                    color: Color(0xff3ecf8e),
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Versi 1.0',
-                  style: TextStyle(
-                    color: const Color(0xff9e9e9e),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home, color: Color(0xff9e9e9e)),
-            title: const Text('Beranda', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.list, color: Color(0xff9e9e9e)),
-            title: const Text('Daftar Lahan', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.eco, color: Color(0xff9e9e9e)),
-            title: const Text('Semprot', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.grass, color: Color(0xff9e9e9e)),
-            title: const Text('Pemupukan', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.agriculture, color: Color(0xff9e9e9e)),
-            title: const Text('Panen', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.build, color: Color(0xff9e9e9e)),
-            title: const Text('Perawatan', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.note, color: Color(0xff9e9e9e)),
-            title: const Text('Catatan Lapangan', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory, color: Color(0xff9e9e9e)),
-            title: const Text('Stok & Notif Produk', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.assessment, color: Color(0xff9e9e9e)),
-            title: const Text('Laporan', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings, color: Color(0xff3ecf8e)),
-            title: const Text('Pengaturan', style: TextStyle(color: Color(0xffe0e0e0))),
-            onTap: () {
-              Navigator.pop(context);
-            },
           ),
         ],
       ),

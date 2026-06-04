@@ -78,6 +78,9 @@ dependencies:
   # Intl
   intl: ^0.19.0
   
+  # Timezone for notifications
+  timezone: ^0.9.2
+  
   # Screenshot
   screenshot: ^2.1.0
 
