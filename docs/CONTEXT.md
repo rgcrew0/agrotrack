@@ -31,72 +31,6 @@ Belum ada koneksi database atau API. Semua data hardcoded.
 - [x] Pengaturan — lib/features/pengaturan/pengaturan_screen.dart (Section 21)
 - [x] Aktivasi Lisensi — lib/features/lisensi/lisensi_screen.dart (Section 22)
 
-### BELUM
-
-## Perintah Task Siap Pakai
-
-### Stok & Notif Produk
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Stok & Notif Produk (lib/features/stok_produk/stok_produk_screen.dart)
-Ikuti Section 15 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Semprot
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Semprot (lib/features/semprot/semprot_screen.dart)
-Ikuti Section 13 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar, Floating Alarm Banner, dan peringatan FRAC/IRAC. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Pemupukan
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Pemupukan (lib/features/pemupukan/pemupukan_screen.dart)
-Ikuti Section 14 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Panen
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Panen (lib/features/panen/panen_screen.dart)
-Ikuti Section 16 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Perawatan
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Perawatan (lib/features/perawatan/perawatan_screen.dart)
-Ikuti Section 17 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Catatan Lapangan
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Catatan Lapangan (lib/features/catatan_lapangan/catatan_lapangan_screen.dart)
-Ikuti Section 18 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Laporan
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Laporan (lib/features/laporan/laporan_screen.dart)
-Ikuti Section 19 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Pengaturan
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Pengaturan (lib/features/pengaturan/pengaturan_screen.dart)
-Ikuti Section 21 blueprint. Mock data hardcoded, belum perlu database.
-Pastikan ada Info Bar dan Floating Alarm Banner. Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
-
-### Aktivasi Lisensi
-Baca docs/agrotrack_blueprint_v4.md dan .devin/rules.md sebelum mulai.
-Task: Buat halaman Aktivasi Lisensi (lib/features/lisensi/lisensi_screen.dart)
-Ikuti Section 22 blueprint. Tampilan saja tanpa koneksi Supabase.
-Form: Nama + Kota + Key (TSM-XXXX). Dark mode default.
-Setelah selesai update docs/CONTEXT.md tandai halaman ini sebagai [x].
 
 ## Catatan Penting
 - Timestamp SELALU dalam detik (BUG 2)
@@ -191,31 +125,88 @@ Halaman Beranda telah diperbaiki lengkap sesuai blueprint Section 11 dengan semu
    - Helper formatRupiah() dibuat di lib/core/format.dart
    - Diterapkan ke semua dashboard cards dan kalkulator
 
-2. **TOOLTIP**
-   - Semua elemen memiliki tooltip (hover di PC, long press di HP)
-   - Sidebar, kolom input, tombol, ikon semua memiliki tooltip
-   - Dashboard cards memiliki tooltip untuk setiap metrik
-   - Kalkulator buttons memiliki tooltip
+2. **TOOLTIP (FIXED - Menggunakan Widget Bawaan Flutter)**
+   - Semua elemen menggunakan Flutter's built-in Tooltip() widget
+   - Tooltip muncul saat hover mouse di PC dan long press di HP
+   - **preferBelow: false** ditambahkan ke semua Tooltip - tooltip muncul DI ATAS elemen, tidak di bawah
+   - Ini mencegah tooltip terhalang jari tangan saat long press di HP
+   - Sidebar menu items: semua memiliki tooltip
+   - Dashboard cards: semua memiliki tooltip untuk setiap metrik
+   - Input fields: semua kolom input memiliki tooltip (Target Campuran, Produk, Dosis, Jumlah Uang, Harga per Kg, Jumlah Gram)
+   - Buttons: semua tombol memiliki tooltip (Tambah Kolom, Kelola Katalog, Reset, Hitung Unsur, Edit, Hapus)
+   - Icons: ikon notifikasi dan search memiliki tooltip
+   - Info icon di kolom produk: tetap menggunakan SnackBar untuk menampilkan 14 unsur hara (karena terlalu panjang untuk tooltip standar)
 
-3. **INFO BAR + FLOATING BANNER NON-STICKY**
+3. **ANIMASI INTERAKTIF (Update 2026-06-04)**
+   - Saat hover mouse (PC) atau finger press (HP): border tipis warna #3ecf8e muncul di pinggir kontainer
+   - Menggunakan AnimatedContainer + InkWell
+   - Durasi animasi: 200ms, smooth
+   - Widget reusable AnimatedBorderContainer dibuat di lib/shared/widgets/animated_border_container.dart
+   - Diterapkan ke:
+     * Dashboard cards di beranda_screen.dart (semua card termasuk Total Omzet)
+     * Buttons di beranda_screen.dart (Tambah Kolom, Kelola Katalog, Reset, Hitung Unsur)
+     * Sidebar menu items di sidebar.dart
+
+4. **RESPONSIVE LAYOUT (Update 2026-06-05)**
+   - Layout kolom berdasarkan lebar layar:
+     * Layar < 365px: 1 kolom (single column)
+     * Layar >= 365px: 2 kolom (grid 2 kolom)
+   - Padding kiri dan kanan: 8dp, kontainer melebar maksimal mengisi layar
+   - Tidak ada ruang kosong berlebih di samping kontainer
+   - Semua teks panjang menggunakan TextOverflow.ellipsis
+   - Menggunakan LayoutBuilder untuk deteksi lebar layar
+   - Scrollbar transparan (thumbVisibility: false, thickness: 0) agar tidak menambah space
+   - Diterapkan ke dashboard cards di beranda_screen.dart
+
+5. **INFO BAR + FLOATING BANNER NON-STICKY**
    - Keduanya TIDAK sticky — ikut scroll ke atas bersama konten
    - Layar terasa lebih luas saat scroll
 
-4. **CARD RINGKASAN SIKLUS LENGKAP**
-   - Total Omzet, ROI, Saldo Siklus, Total Biaya
-   - Populasi Awal & Realtime, Biaya/Pohon, Omzet/Pohon
-   - HPP/kg, Stok Kritis, BEP
+6. **CARD RINGKASAN SIKLUS LENGKAP (REDESIGNED - Update 2026-06-04)**
+   - **Total Omzet**: Card penuh 1 baris di paling atas, angka besar dan menonjol (fontSize 32) dengan icon trending_up
+   - Sisanya dalam grid 2 kolom rapi dan sejajar:
+     * Populasi Awal
+     * Populasi Hidup
+     * Total Pohon Mati
+     * Biaya/Pohon
+     * Keuntungan/Tanaman
+     * Omzet/Pohon
+     * Total Panen (kg)
+     * Persentase Reject (%)
+     * Estimasi Panen Berikutnya (H berapa lagi)
+     * Total Semprot (berapa kali)
+     * Total Pemupukan (berapa kali)
+     * Total Biaya
+     * Laba Bersih
+     * HPP/kg
+     * BEP (kg)
+     * ROI (%)
    - Semua nominal Rupiah pakai format titik
+   - Semua card punya tooltip sesuai fungsinya
    - Mock data hardcoded
 
-5. **GRAFIK MULTIFUNGSI 7 MODE DIPERBAIKI**
+7. **GRAFIK MULTIFUNGSI 7 MODE DIPERBAIKI (Update 2026-06-05)**
    - Cashflow, Biaya Kumulatif, Omzet Kumulatif, Panen per Periode
    - Biaya per Kategori, Populasi, Unsur Hara
    - Setiap grafik menampilkan: angka/label di titik data, sumbu X dan Y dengan label, legend/keterangan warna, tooltip saat hover/tap
    - Warna sesuai blueprint: Biaya/rugi (#e53935 merah), Omzet/laba (#3ecf8e hijau), BEP line (#fdd835 kuning putus-putus)
    - Tinggi grafik ditingkatkan ke 250px untuk better visibility
+   - **Filter UI**: SegmentedButton untuk filter waktu/aktivitas (Per Aktivitas, Mingguan, Bulanan, Tahunan)
+   - **Watermark Logo** (Update 2026-06-05):
+     * Logo ClipSmart ditampilkan di tengah semua grafik fl_chart
+     * Menggunakan Stack widget dengan logo di posisi center
+     * Opacity watermark: 0.15 (dikonfigurasi di lib/core/konstanta.dart)
+     * Asset: assets/images/clipsmart logo.png (terdaftar di pubspec.yaml)
+     * Logo tidak menutupi data grafik (opacity rendah + posisi center)
+     * Diterapkan ke semua 7 mode grafik: Cashflow, Biaya Kumulatif, Omzet Kumulatif, Panen per Periode, Biaya per Kategori, Populasi, Unsur Hara
+   - **Indikator & Legenda Adaptif Tema**:
+     * TouchData aktif untuk tooltip saat grafik disentuh
+     * Warna elemen grafik, teks sumbu X/Y, dan tooltip bersifat ADAPTIF (dark/light mode)
+     * Mode Terang: teks hitam, background tooltip putih
+     * Mode Gelap: teks putih/abu-abu, background tooltip gelap
+     * Legenda warna indikator data rapi di bawah grafik
 
-6. **PANEL NOTIFIKASI DIPERBAIKI**
+8. **PANEL NOTIFIKASI DIPERBAIKI**
    - Ikon lonceng kanan atas bisa diklik dan muncul panel
    - Panel tipis, memanjang ke bawah
    - Background belakang diburamkan (blur) saat panel terbuka
@@ -223,7 +214,7 @@ Halaman Beranda telah diperbaiki lengkap sesuai blueprint Section 11 dengan semu
    - 5 slide sesuai blueprint: Jadwal mendatang, Keterlambatan, Selesai baru, Stok menipis, Pesan admin
    - Semua mock data hardcoded
 
-7. **ALARM NOTIFIKASI HP**
+9. **ALARM NOTIFIKASI HP**
    - H-2: notifikasi pertama
    - H-1: notifikasi kedua
    - H: notifikasi hari H (paling penting)
@@ -231,7 +222,7 @@ Halaman Beranda telah diperbaiki lengkap sesuai blueprint Section 11 dengan semu
    - Method _scheduleAlarmNotifications() siap dipanggil
    - Package timezone ^0.9.2 ditambahkan ke pubspec.yaml
 
-8. **KALKULATOR PUPUK DIPERBAIKI**
+10. **KALKULATOR PUPUK DIPERBAIKI**
    - Hapus "Total Gram" dan "Total Biaya" dari bagian atas
    - Urutan layout:
      * Paling atas: dropdown [Kalkulator Pupuk ▼] | [Pupuk ▼ / Gram/Harga ▼]
@@ -241,9 +232,9 @@ Halaman Beranda telah diperbaiki lengkap sesuai blueprint Section 11 dengan semu
      * Baris 3: Tombol [+ Tambah Kolom] | [Kelola Katalog]
      * Baris 4: Tombol Reset (25% lebar, kecil) | Tombol Hitung Unsur (75% lebar)
      * Hasil hitung: "Unsur hara ini dibuat dari [X] gram", tampilkan HANYA unsur yang ada dalam produk + total gram murninya
-     * Hasil HILANG jika ada angka diubah, muncul kembali hanya jika klik Hitung Unsur lagi
-     * Tooltip di kolom produk: tampilkan 14 unsur hara produk tersebut
-     * Reset: hapus angka gram saja, nama produk tetap
+     - Hasil HILANG jika ada angka diubah, muncul kembali hanya jika klik Hitung Unsur lagi
+     - Tooltip di kolom produk: tampilkan 14 unsur hara produk tersebut
+     - Reset: hapus angka gram saja, nama produk tetap
    - Kelola Katalog: Form input Nama Produk + 14 kolom unsur hara (placeholder)
 
 **Dependencies yang Ditambahkan:**
@@ -252,5 +243,7 @@ Halaman Beranda telah diperbaiki lengkap sesuai blueprint Section 11 dengan semu
 
 **Files yang Dimodifikasi:**
 - lib/core/format.dart - Dibuat baru dengan helper formatRupiah()
-- lib/features/beranda/beranda_screen.dart - Diperbaiki lengkap sesuai semua requirement
+- lib/shared/widgets/animated_border_container.dart - Dibuat baru untuk animasi border interaktif
+- lib/features/beranda/beranda_screen.dart - Diperbaiki lengkap sesuai semua requirement + animasi interaktif
+- lib/shared/widgets/sidebar.dart - Tooltip menggunakan widget bawaan Flutter + animasi interaktif
 - pubspec.yaml - Ditambahkan package timezone

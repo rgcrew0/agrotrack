@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'animated_border_container.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -146,47 +147,35 @@ class Sidebar extends StatelessWidget {
     final currentRoute = GoRouterState.of(context).matchedLocation;
     final isSelected = currentRoute == route;
 
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected ? const Color(0xFF3ecf8e) : const Color(0xFFe0e0e0),
-      ),
-      title: Row(
-        children: [
-          Text(
+    return Tooltip(
+      message: tooltip ?? title,
+      preferBelow: false,
+      child: AnimatedBorderContainer(
+        onTap: () {
+          context.push(route);
+          Navigator.pop(context);
+        },
+        backgroundColor: isSelected ? const Color(0xFF44425c) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: ListTile(
+          leading: Icon(
+            icon,
+            color: isSelected ? const Color(0xFF3ecf8e) : const Color(0xFFe0e0e0),
+          ),
+          title: Text(
             title,
             style: TextStyle(
               color: isSelected ? const Color(0xFF3ecf8e) : const Color(0xFFe0e0e0),
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          if (tooltip != null) ...[
-            const SizedBox(width: 4),
-            GestureDetector(
-              onLongPress: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(tooltip),
-                    backgroundColor: const Color(0xFF3ecf8e),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              },
-              child: const Icon(
-                Icons.info_outline,
-                color: Color(0xFF3ecf8e),
-                size: 14,
-              ),
-            ),
-          ],
-        ],
+          selected: false,
+          onTap: () {
+            context.push(route);
+            Navigator.pop(context);
+          },
+        ),
       ),
-      selected: isSelected,
-      selectedTileColor: const Color(0xFF44425c),
-      onTap: () {
-        context.push(route);
-        Navigator.pop(context);
-      },
     );
   }
 }

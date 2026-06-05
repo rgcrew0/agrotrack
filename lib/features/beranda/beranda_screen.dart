@@ -5,7 +5,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import '../../shared/widgets/sidebar.dart';
+import '../../shared/widgets/animated_border_container.dart';
 import '../../core/format.dart';
+import '../../core/konstanta.dart';
 
 class BerandaScreen extends StatefulWidget {
   const BerandaScreen({super.key});
@@ -26,17 +28,21 @@ class _BerandaScreenState extends State<BerandaScreen> {
 
   // Mock data for Dashboard cards
   final Map<String, dynamic> _mockDashboardData = {
-    'totalBiaya': 15000000,
     'totalOmzet': 25000000,
-    'labaBersih': 10000000,
-    'saldoSiklus': 10000000,
     'populasiAwal': 1000,
     'populasiHidup': 950,
-    'totalPanen': 2500,
+    'totalPohonMati': 50,
     'biayaPerTanaman': 15789,
+    'keuntunganPerTanaman': 10526,
     'omzetPerTanaman': 26316,
+    'totalPanen': 2500,
+    'persentaseReject': 5.2,
+    'estimasiPanenBerikutnya': 15,
+    'totalSemprot': 8,
+    'totalPemupukan': 12,
+    'totalBiaya': 15000000,
+    'labaBersih': 10000000,
     'hppPerGram': 6000,
-    'stokKritis': 3,
     'bepGram': 1500,
     'roi': 66.67,
   };
@@ -104,6 +110,10 @@ class _BerandaScreenState extends State<BerandaScreen> {
     'Cashflow', 'Biaya Kumulatif', 'Omzet Kumulatif', 'Panen per Periode',
     'Biaya per Kategori', 'Populasi', 'Unsur Hara'
   ];
+  
+  // Time/Activity filter state
+  int _selectedTimeFilter = 0;
+  final List<String> _timeFilters = ['Per Aktivitas', 'Mingguan', 'Bulanan', 'Tahunan'];
 
   // Notification slide data
   final List<List<Map<String, dynamic>>> _notificationSlides = [
@@ -438,20 +448,21 @@ class _BerandaScreenState extends State<BerandaScreen> {
       body: Stack(
         children: [
           // Main content - Info Bar and Floating Banner now scroll with content
-          SingleChildScrollView(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                // Info Bar
-                _buildInfoBar(),
-                
-                // Floating Alarm Banner
-                _buildFloatingAlarmBanner(),
-                
-                // Dashboard Cards
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+          Scrollbar(
+            thumbVisibility: false,
+            thickness: 0,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                children: [
+                  // Info Bar
+                  _buildInfoBar(),
+                  
+                  // Floating Alarm Banner
+                  _buildFloatingAlarmBanner(),
+                  
+                  // Dashboard Cards
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Dashboard Cards
@@ -468,8 +479,8 @@ class _BerandaScreenState extends State<BerandaScreen> {
                       _buildCombinedCalculator(),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           
@@ -597,180 +608,377 @@ class _BerandaScreenState extends State<BerandaScreen> {
   }
 
   Widget _buildDashboardCards() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Ringkasan Siklus',
-          style: TextStyle(
-            color: Color(0xffe0e0e0),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use MediaQuery to get actual screen width, not constrained width
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isSmallScreen = screenWidth < 365;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _buildDashboardCard(
-                'Total Biaya',
-                formatRupiah(_mockDashboardData['totalBiaya'] as int),
-                const Color(0xffe53935),
-                tooltip: 'Total seluruh biaya yang dikeluarkan dalam siklus ini',
+            const Text(
+              'Ringkasan Siklus',
+              style: TextStyle(
+                color: Color(0xffe0e0e0),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDashboardCard(
-                'Total Omzet',
-                formatRupiah(_mockDashboardData['totalOmzet'] as int),
-                const Color(0xff3ecf8e),
-                tooltip: 'Total pendapatan dari penjualan hasil panen',
+            const SizedBox(height: 12),
+            
+            // Total Omzet - Full width card at top
+            Tooltip(
+              message: 'Total pendapatan dari penjualan hasil panen',
+              preferBelow: false,
+              child: AnimatedBorderContainer(
+                backgroundColor: const Color(0xff44425c),
+                borderRadius: BorderRadius.circular(12),
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Total Omzet',
+                            style: TextStyle(
+                              color: Color(0xff9e9e9e),
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            formatRupiah(_mockDashboardData['totalOmzet'] as int),
+                            style: const TextStyle(
+                              color: Color(0xff3ecf8e),
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.trending_up,
+                      color: Color(0xff3ecf8e),
+                      size: 40,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildDashboardCard(
-                'Laba Bersih',
-                formatRupiah(_mockDashboardData['labaBersih'] as int),
-                const Color(0xff3ecf8e),
-                tooltip: 'Omzet dikurangi total biaya',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDashboardCard(
-                'Saldo Siklus',
-                formatRupiah(_mockDashboardData['saldoSiklus'] as int),
-                const Color(0xff3ecf8e),
-                tooltip: 'Saldo kas siklus saat ini',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildDashboardCard(
+            
+            const SizedBox(height: 12),
+            
+            // Responsive grid for remaining cards
+            if (isSmallScreen) ...[
+              // 1 column for small screens
+              _buildDashboardCard(
                 'Populasi Awal',
                 '${_mockDashboardData['populasiAwal'].toString()} pohon',
                 const Color(0xff1e88e5),
                 tooltip: 'Jumlah tanaman awal saat tanam',
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDashboardCard(
+              const SizedBox(height: 12),
+              _buildDashboardCard(
                 'Populasi Hidup',
                 '${_mockDashboardData['populasiHidup'].toString()} pohon',
                 const Color(0xff1e88e5),
                 tooltip: 'Jumlah tanaman yang masih hidup saat ini',
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildDashboardCard(
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Total Pohon Mati',
+                '${_mockDashboardData['totalPohonMati'].toString()} pohon',
+                const Color(0xffe53935),
+                tooltip: 'Jumlah tanaman yang mati',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Biaya/Pohon',
+                formatRupiah(_mockDashboardData['biayaPerTanaman'] as int),
+                const Color(0xffe53935),
+                tooltip: 'Rata-rata biaya per tanaman hidup',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Keuntungan/Tanaman',
+                formatRupiah(_mockDashboardData['keuntunganPerTanaman'] as int),
+                const Color(0xff3ecf8e),
+                tooltip: 'Rata-rata keuntungan per tanaman',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Omzet/Pohon',
+                formatRupiah(_mockDashboardData['omzetPerTanaman'] as int),
+                const Color(0xff3ecf8e),
+                tooltip: 'Rata-rata omzet per tanaman',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
                 'Total Panen',
                 '${(_mockDashboardData['totalPanen'] as int).toString()} kg',
                 const Color(0xfffdd835),
                 tooltip: 'Total berat hasil panen yang sudah dicatat',
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDashboardCard(
-                'Biaya/Tanaman',
-                formatRupiah(_mockDashboardData['biayaPerTanaman'] as int),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Persentase Reject',
+                '${(_mockDashboardData['persentaseReject'] as double).toStringAsFixed(1)}%',
                 const Color(0xffe53935),
-                tooltip: 'Rata-rata biaya per tanaman hidup',
+                tooltip: 'Persentase hasil panen yang reject',
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildDashboardCard(
-                'Omzet/Tanaman',
-                formatRupiah(_mockDashboardData['omzetPerTanaman'] as int),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Estimasi Panen',
+                'H-${_mockDashboardData['estimasiPanenBerikutnya'].toString()}',
+                const Color(0xfffdd835),
+                tooltip: 'Perkiraan hari sampai panen berikutnya',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Total Semprot',
+                '${_mockDashboardData['totalSemprot'].toString()} kali',
+                const Color(0xff1e88e5),
+                tooltip: 'Total aktivitas semprot yang sudah dilakukan',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Total Pemupukan',
+                '${_mockDashboardData['totalPemupukan'].toString()} kali',
+                const Color(0xff1e88e5),
+                tooltip: 'Total aktivitas pemupukan yang sudah dilakukan',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Total Biaya',
+                formatRupiah(_mockDashboardData['totalBiaya'] as int),
+                const Color(0xffe53935),
+                tooltip: 'Total seluruh biaya yang dikeluarkan dalam siklus ini',
+              ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'Laba Bersih',
+                formatRupiah(_mockDashboardData['labaBersih'] as int),
                 const Color(0xff3ecf8e),
-                tooltip: 'Rata-rata omzet per tanaman hidup',
+                tooltip: 'Omzet dikurangi total biaya',
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDashboardCard(
-                'Stok Kritis',
-                '${_mockDashboardData['stokKritis'].toString()} produk',
-                const Color(0xffe53935),
-                tooltip: 'Jumlah produk dengan stok di bawah batas minimal',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildDashboardCard(
-                'HPP per Gram',
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'HPP/kg',
                 formatRupiah(_mockDashboardData['hppPerGram'] as int),
                 const Color(0xffe53935),
                 tooltip: 'Harga Pokok Produksi per gram hasil panen',
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDashboardCard(
+              const SizedBox(height: 12),
+              _buildDashboardCard(
                 'BEP',
                 '${(_mockDashboardData['bepGram'] as int).toString()} kg',
                 const Color(0xfffdd835),
                 tooltip: 'Break Even Point - berat panen untuk balik modal',
               ),
-            ),
+              const SizedBox(height: 12),
+              _buildDashboardCard(
+                'ROI',
+                '${(_mockDashboardData['roi'] as double).toStringAsFixed(2)}%',
+                const Color(0xff3ecf8e),
+                tooltip: 'Return on Investment - persentase keuntungan terhadap modal',
+              ),
+            ] else ...[
+              // 2-column grid for larger screens
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Populasi Awal',
+                      '${_mockDashboardData['populasiAwal'].toString()} pohon',
+                      const Color(0xff1e88e5),
+                      tooltip: 'Jumlah tanaman awal saat tanam',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Populasi Hidup',
+                      '${_mockDashboardData['populasiHidup'].toString()} pohon',
+                      const Color(0xff1e88e5),
+                      tooltip: 'Jumlah tanaman yang masih hidup saat ini',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Total Pohon Mati',
+                      '${_mockDashboardData['totalPohonMati'].toString()} pohon',
+                      const Color(0xffe53935),
+                      tooltip: 'Jumlah tanaman yang mati',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Biaya/Pohon',
+                      formatRupiah(_mockDashboardData['biayaPerTanaman'] as int),
+                      const Color(0xffe53935),
+                      tooltip: 'Rata-rata biaya per tanaman hidup',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Keuntungan/Tanaman',
+                      formatRupiah(_mockDashboardData['keuntunganPerTanaman'] as int),
+                      const Color(0xff3ecf8e),
+                      tooltip: 'Rata-rata keuntungan per tanaman',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Omzet/Pohon',
+                      formatRupiah(_mockDashboardData['omzetPerTanaman'] as int),
+                      const Color(0xff3ecf8e),
+                      tooltip: 'Rata-rata omzet per tanaman',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Total Panen',
+                      '${(_mockDashboardData['totalPanen'] as int).toString()} kg',
+                      const Color(0xfffdd835),
+                      tooltip: 'Total berat hasil panen yang sudah dicatat',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Persentase Reject',
+                      '${(_mockDashboardData['persentaseReject'] as double).toStringAsFixed(1)}%',
+                      const Color(0xffe53935),
+                      tooltip: 'Persentase hasil panen yang reject',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Estimasi Panen',
+                      'H-${_mockDashboardData['estimasiPanenBerikutnya'].toString()}',
+                      const Color(0xfffdd835),
+                      tooltip: 'Perkiraan hari sampai panen berikutnya',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Total Semprot',
+                      '${_mockDashboardData['totalSemprot'].toString()} kali',
+                      const Color(0xff1e88e5),
+                      tooltip: 'Total aktivitas semprot yang sudah dilakukan',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Total Pemupukan',
+                      '${_mockDashboardData['totalPemupukan'].toString()} kali',
+                      const Color(0xff1e88e5),
+                      tooltip: 'Total aktivitas pemupukan yang sudah dilakukan',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Total Biaya',
+                      formatRupiah(_mockDashboardData['totalBiaya'] as int),
+                      const Color(0xffe53935),
+                      tooltip: 'Total seluruh biaya yang dikeluarkan dalam siklus ini',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'Laba Bersih',
+                      formatRupiah(_mockDashboardData['labaBersih'] as int),
+                      const Color(0xff3ecf8e),
+                      tooltip: 'Omzet dikurangi total biaya',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'HPP/kg',
+                      formatRupiah(_mockDashboardData['hppPerGram'] as int),
+                      const Color(0xffe53935),
+                      tooltip: 'Harga Pokok Produksi per gram hasil panen',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'BEP',
+                      '${(_mockDashboardData['bepGram'] as int).toString()} kg',
+                      const Color(0xfffdd835),
+                      tooltip: 'Break Even Point - berat panen untuk balik modal',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      'ROI',
+                      '${(_mockDashboardData['roi'] as double).toStringAsFixed(2)}%',
+                      const Color(0xff3ecf8e),
+                      tooltip: 'Return on Investment - persentase keuntungan terhadap modal',
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
-        ),
-        const SizedBox(height: 12),
-        _buildDashboardCard(
-          'ROI',
-          '${(_mockDashboardData['roi'] as double).toStringAsFixed(2)}%',
-          const Color(0xff3ecf8e),
-          tooltip: 'Return on Investment - persentase keuntungan terhadap modal',
-        ),
-      ],
+        );
+      },
     );
   }
 
   Widget _buildDashboardCard(String label, String value, Color color, {String? tooltip}) {
-    return GestureDetector(
-      onLongPress: () {
-        if (tooltip != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(tooltip),
-              backgroundColor: const Color(0xff3ecf8e),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Container(
+    return Tooltip(
+      message: tooltip ?? label,
+      preferBelow: false,
+      child: AnimatedBorderContainer(
+        backgroundColor: const Color(0xff44425c),
+        borderRadius: BorderRadius.circular(12),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xff44425c),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xff57611f).withOpacity(0.5)),
-        ),
         child: Row(
           children: [
             Expanded(
@@ -779,11 +987,14 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        label,
-                        style: const TextStyle(
-                          color: Color(0xff9e9e9e),
-                          fontSize: 12,
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            color: Color(0xff9e9e9e),
+                            fontSize: 12,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (tooltip != null) ...[
@@ -804,6 +1015,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -815,6 +1027,8 @@ class _BerandaScreenState extends State<BerandaScreen> {
   }
 
   Widget _buildGrafikMultifungsi() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -860,58 +1074,94 @@ class _BerandaScreenState extends State<BerandaScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          
+          // Time/Activity Filter
+          SegmentedButton<int>(
+            segments: List.generate(
+              _timeFilters.length,
+              (index) => ButtonSegment(
+                value: index,
+                label: Text(
+                  _timeFilters[index],
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            selected: {_selectedTimeFilter},
+            onSelectionChanged: (Set<int> newSelection) {
+              setState(() {
+                _selectedTimeFilter = newSelection.first;
+              });
+            },
+            style: SegmentedButton.styleFrom(
+              backgroundColor: isDarkMode ? const Color(0xff2b322d) : Colors.grey[200],
+              foregroundColor: isDarkMode ? Colors.white : Colors.black,
+              selectedBackgroundColor: const Color(0xff3ecf8e),
+              selectedForegroundColor: const Color(0xff121212),
+            ),
+          ),
+          
           const SizedBox(height: 16),
+          
+          // Chart with watermark (inside each chart)
           SizedBox(
             height: 250,
-            child: _buildChartContent(),
+            child: _buildChartContent(isDarkMode),
           ),
+          
           // Legend
           const SizedBox(height: 12),
-          _buildChartLegend(),
+          _buildChartLegend(isDarkMode),
         ],
       ),
     );
   }
 
-  Widget _buildChartLegend() {
+  Widget _buildChartLegend(bool isDarkMode) {
+    final textColor = isDarkMode ? const Color(0xff9e9e9e) : Colors.black87;
+    
     switch (_selectedChartMode) {
       case 0: // Cashflow
       case 2: // Omzet Kumulatif
         return Row(
           children: [
-            _buildLegendItem('Omzet/Laba', const Color(0xff3ecf8e)),
+            _buildLegendItem('Omzet/Laba', const Color(0xff3ecf8e), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('BEP Line', const Color(0xfffdd835)),
+            _buildLegendItem('BEP Line', const Color(0xfffdd835), textColor),
           ],
         );
       case 1: // Biaya Kumulatif
         return Row(
           children: [
-            _buildLegendItem('Biaya/Rugi', const Color(0xffe53935)),
+            _buildLegendItem('Biaya/Rugi', const Color(0xffe53935), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('BEP Line', const Color(0xfffdd835)),
+            _buildLegendItem('BEP Line', const Color(0xfffdd835), textColor),
           ],
         );
       case 4: // Biaya per Kategori
         return Row(
           children: [
-            _buildLegendItem('Pupuk', const Color(0xffe53935)),
+            _buildLegendItem('Pupuk', const Color(0xffe53935), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('Obat', const Color(0xfffdd835)),
+            _buildLegendItem('Obat', const Color(0xfffdd835), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('Tenaga Kerja', const Color(0xff3ecf8e)),
+            _buildLegendItem('Tenaga Kerja', const Color(0xff3ecf8e), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('Lainnya', const Color(0xff1e88e5)),
+            _buildLegendItem('Lainnya', const Color(0xff1e88e5), textColor),
           ],
         );
       case 6: // Unsur Hara
         return Row(
           children: [
-            _buildLegendItem('N', const Color(0xff3ecf8e)),
+            _buildLegendItem('N', const Color(0xff3ecf8e), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('P', const Color(0xfffdd835)),
+            _buildLegendItem('P', const Color(0xfffdd835), textColor),
             const SizedBox(width: 16),
-            _buildLegendItem('K', const Color(0xff1e88e5)),
+            _buildLegendItem('K', const Color(0xff1e88e5), textColor),
           ],
         );
       default:
@@ -919,7 +1169,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
     }
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildLegendItem(String label, Color color, Color textColor) {
     return Row(
       children: [
         Container(
@@ -933,8 +1183,8 @@ class _BerandaScreenState extends State<BerandaScreen> {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xff9e9e9e),
+          style: TextStyle(
+            color: textColor,
             fontSize: 12,
           ),
         ),
@@ -942,104 +1192,155 @@ class _BerandaScreenState extends State<BerandaScreen> {
     );
   }
 
-  Widget _buildChartContent() {
+  Widget _buildWatermark() {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.center,
+        child: Opacity(
+          opacity: watermarkOpacity,
+          child: Image.asset(
+            'assets/images/clipsmart logo.png',
+            width: watermarkWidth,
+            height: watermarkHeight,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChartContent(bool isDarkMode) {
+    final gridColor = isDarkMode ? const Color(0xff57611f).withOpacity(0.3) : Colors.grey.withOpacity(0.3);
+    final axisTextColor = isDarkMode ? const Color(0xff9e9e9e) : Colors.black87;
+    final tooltipBgColor = isDarkMode ? const Color(0xff44425c) : Colors.white;
+    final tooltipTextColor = isDarkMode ? Colors.white : Colors.black;
+    
     switch (_selectedChartMode) {
       case 0: // Cashflow
-        return LineChart(
-          LineChartData(
+        return Stack(
+          children: [
+            LineChart(
+              LineChartData(
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
               horizontalInterval: 5,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: const Color(0xff57611f).withOpacity(0.3),
+                color: gridColor,
                 strokeWidth: 1,
               ),
             ),
             titlesData: FlTitlesData(
+              show: true,
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 30,
+                  getTitlesWidget: (value, meta) {
+                    return Text(
+                      value.toString(),
+                      style: TextStyle(
+                        color: axisTextColor,
+                        fontSize: 10,
+                      ),
+                    );
+                  },
+                ),
+              ),
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 40,
                   getTitlesWidget: (value, meta) {
                     return Text(
-                      '${value.toInt()}M',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      value.toString(),
+                      style: TextStyle(
+                        color: axisTextColor,
+                        fontSize: 10,
+                      ),
                     );
                   },
                 ),
               ),
-              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
               topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: (value, meta) {
-                    return Text(
-                      'H${value.toInt()}',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
-                    );
-                  },
-                ),
-              ),
+              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
-            borderData: FlBorderData(show: false),
-            lineBarsData: [
-              LineChartBarData(
-                spots: const [
-                  FlSpot(0, 5),
-                  FlSpot(1, 8),
-                  FlSpot(2, 12),
-                  FlSpot(3, 15),
-                  FlSpot(4, 20),
-                ],
-                isCurved: true,
-                color: const Color(0xff3ecf8e),
-                barWidth: 3,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (spot, percent, barData, index) => 
-                    FlDotCirclePainter(radius: 4, color: const Color(0xff3ecf8e), strokeWidth: 2),
-                ),
-              ),
-              // BEP Line
-              LineChartBarData(
-                spots: const [
-                  FlSpot(0, 10),
-                  FlSpot(4, 10),
-                ],
-                isCurved: false,
-                color: const Color(0xfffdd835),
-                barWidth: 2,
-                dashArray: [5, 5],
-                dotData: const FlDotData(show: false),
-              ),
-            ],
+            borderData: FlBorderData(
+              show: true,
+              border: Border.all(color: gridColor),
+            ),
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (touchedSpot) => const Color(0xff351515),
                 tooltipRoundedRadius: 8,
+                getTooltipColor: (touchedSpot) => tooltipBgColor,
                 getTooltipItems: (touchedSpots) {
                   return touchedSpots.map((spot) {
                     return LineTooltipItem(
-                      'Rp ${spot.y.toInt()}jt',
-                      const TextStyle(color: Color(0xfff0f0f0), fontSize: 12),
+                      '${spot.y.toStringAsFixed(2)}',
+                      TextStyle(
+                        color: tooltipTextColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     );
                   }).toList();
                 },
               ),
+              touchCallback: (FlTouchEvent event, LineTouchResponse? response) {},
+              handleBuiltInTouches: true,
             ),
+            lineBarsData: [
+              LineChartBarData(
+                spots: const [
+                  FlSpot(0, 5),
+                  FlSpot(1, 10),
+                  FlSpot(2, 8),
+                  FlSpot(3, 15),
+                  FlSpot(4, 12),
+                  FlSpot(5, 20),
+                  FlSpot(6, 18),
+                ],
+                isCurved: true,
+                color: const Color(0xff3ecf8e),
+                barWidth: 3,
+                dotData: const FlDotData(show: true),
+                belowBarData: BarAreaData(
+                  show: true,
+                  color: const Color(0xff3ecf8e).withOpacity(0.3),
+                ),
+              ),
+              LineChartBarData(
+                spots: const [
+                  FlSpot(0, 10),
+                  FlSpot(1, 10),
+                  FlSpot(2, 10),
+                  FlSpot(3, 10),
+                  FlSpot(4, 10),
+                  FlSpot(5, 10),
+                  FlSpot(6, 10),
+                ],
+                isCurved: false,
+                color: const Color(0xfffdd835),
+                barWidth: 2,
+                dotData: const FlDotData(show: false),
+                dashArray: [5, 5],
+              ),
+            ],
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       case 1: // Biaya Kumulatif
-        return LineChart(
-          LineChartData(
+        return Stack(
+          children: [
+            LineChart(
+              LineChartData(
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
               horizontalInterval: 5,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: const Color(0xff57611f).withOpacity(0.3),
+                color: gridColor,
                 strokeWidth: 1,
               ),
             ),
@@ -1051,7 +1352,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       '${value.toInt()}M',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
@@ -1064,13 +1365,28 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       'H${value.toInt()}',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
               ),
             ),
             borderData: FlBorderData(show: false),
+            lineTouchData: LineTouchData(
+              touchTooltipData: LineTouchTooltipData(
+                tooltipRoundedRadius: 8,
+                getTooltipColor: (touchedSpot) => tooltipBgColor,
+                getTooltipItems: (touchedSpots) {
+                  return touchedSpots.map((spot) {
+                    return LineTooltipItem(
+                      'Rp ${spot.y.toInt()}jt',
+                      TextStyle(color: tooltipTextColor, fontSize: 12),
+                    );
+                  }).toList();
+                },
+              ),
+              handleBuiltInTouches: true,
+            ),
             lineBarsData: [
               LineChartBarData(
                 spots: const [
@@ -1083,11 +1399,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 isCurved: true,
                 color: const Color(0xffe53935),
                 barWidth: 3,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (spot, percent, barData, index) =>
-                    FlDotCirclePainter(radius: 4, color: const Color(0xffe53935), strokeWidth: 2),
-                ),
+                dotData: const FlDotData(show: true),
               ),
               // BEP Line
               LineChartBarData(
@@ -1102,31 +1414,22 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 dotData: const FlDotData(show: false),
               ),
             ],
-            lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (touchedSpot) => const Color(0xff351515),
-                tooltipRoundedRadius: 8,
-                getTooltipItems: (touchedSpots) {
-                  return touchedSpots.map((spot) {
-                    return LineTooltipItem(
-                      'Rp ${spot.y.toInt()}jt',
-                      const TextStyle(color: Color(0xfff0f0f0), fontSize: 12),
-                    );
-                  }).toList();
-                },
-              ),
-            ),
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       case 2: // Omzet Kumulatif
-        return LineChart(
-          LineChartData(
+        return Stack(
+          children: [
+            LineChart(
+              LineChartData(
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
               horizontalInterval: 5,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: const Color(0xff57611f).withOpacity(0.3),
+                color: gridColor,
                 strokeWidth: 1,
               ),
             ),
@@ -1138,7 +1441,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       '${value.toInt()}M',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
@@ -1151,30 +1454,41 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       'H${value.toInt()}',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
               ),
             ),
             borderData: FlBorderData(show: false),
+            lineTouchData: LineTouchData(
+              touchTooltipData: LineTouchTooltipData(
+                tooltipRoundedRadius: 8,
+                getTooltipColor: (touchedSpot) => tooltipBgColor,
+                getTooltipItems: (touchedSpots) {
+                  return touchedSpots.map((spot) {
+                    return LineTooltipItem(
+                      'Rp ${spot.y.toInt()}jt',
+                      TextStyle(color: tooltipTextColor, fontSize: 12),
+                    );
+                  }).toList();
+                },
+              ),
+              handleBuiltInTouches: true,
+            ),
             lineBarsData: [
               LineChartBarData(
                 spots: const [
-                  FlSpot(0, 0),
-                  FlSpot(1, 3),
-                  FlSpot(2, 7),
-                  FlSpot(3, 12),
-                  FlSpot(4, 18),
+                  FlSpot(0, 5),
+                  FlSpot(1, 8),
+                  FlSpot(2, 12),
+                  FlSpot(3, 15),
+                  FlSpot(4, 20),
                 ],
                 isCurved: true,
                 color: const Color(0xff3ecf8e),
                 barWidth: 3,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (spot, percent, barData, index) => 
-                    FlDotCirclePainter(radius: 4, color: const Color(0xff3ecf8e), strokeWidth: 2),
-                ),
+                dotData: const FlDotData(show: true),
               ),
               // BEP Line
               LineChartBarData(
@@ -1189,31 +1503,22 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 dotData: const FlDotData(show: false),
               ),
             ],
-            lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (touchedSpot) => const Color(0xff351515),
-                tooltipRoundedRadius: 8,
-                getTooltipItems: (touchedSpots) {
-                  return touchedSpots.map((spot) {
-                    return LineTooltipItem(
-                      'Rp ${spot.y.toInt()}jt',
-                      const TextStyle(color: Color(0xfff0f0f0), fontSize: 12),
-                    );
-                  }).toList();
-                },
-              ),
-            ),
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       case 3: // Panen per Periode
-        return BarChart(
-          BarChartData(
+        return Stack(
+          children: [
+            BarChart(
+              BarChartData(
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
               horizontalInterval: 400,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: const Color(0xff57611f).withOpacity(0.3),
+                color: gridColor,
                 strokeWidth: 1,
               ),
             ),
@@ -1225,7 +1530,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       '${value.toInt()}kg',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
@@ -1236,28 +1541,36 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 sideTitles: SideTitles(
                   showTitles: true,
                   getTitlesWidget: (value, meta) {
-                    final labels = ['P1', 'P2', 'P3'];
-                    if (value.toInt() >= 0 && value.toInt() < labels.length) {
-                      return Text(
-                        labels[value.toInt()],
-                        style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
-                      );
-                    }
-                    return const Text('');
+                    return Text(
+                      'P${value.toInt()}',
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
+                    );
                   },
                 ),
               ),
             ),
             borderData: FlBorderData(show: false),
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                tooltipRoundedRadius: 8,
+                getTooltipColor: (group) => tooltipBgColor,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  return BarTooltipItem(
+                    '${rod.toY.round()}kg',
+                    TextStyle(color: tooltipTextColor, fontWeight: FontWeight.bold),
+                  );
+                },
+              ),
+              handleBuiltInTouches: true,
+            ),
             barGroups: [
               BarChartGroupData(
                 x: 0,
                 barRods: [
                   BarChartRodData(
                     toY: 500,
-                    color: const Color(0xfffdd835),
-                    width: 30,
-                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xff3ecf8e),
+                    width: 16,
                   ),
                 ],
               ),
@@ -1266,9 +1579,8 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 barRods: [
                   BarChartRodData(
                     toY: 800,
-                    color: const Color(0xfffdd835),
-                    width: 30,
-                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xff3ecf8e),
+                    width: 16,
                   ),
                 ],
               ),
@@ -1277,31 +1589,42 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 barRods: [
                   BarChartRodData(
                     toY: 1200,
-                    color: const Color(0xfffdd835),
-                    width: 30,
-                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xff3ecf8e),
+                    width: 16,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 3,
+                barRods: [
+                  BarChartRodData(
+                    toY: 1500,
+                    color: const Color(0xff3ecf8e),
+                    width: 16,
+                  ),
+                ],
+              ),
+              BarChartGroupData(
+                x: 4,
+                barRods: [
+                  BarChartRodData(
+                    toY: 1800,
+                    color: const Color(0xff3ecf8e),
+                    width: 16,
                   ),
                 ],
               ),
             ],
-            barTouchData: BarTouchData(
-              enabled: true,
-              touchTooltipData: BarTouchTooltipData(
-                getTooltipColor: (group) => const Color(0xff351515),
-                tooltipRoundedRadius: 8,
-                getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                  return BarTooltipItem(
-                    '${rod.toY.toInt()} kg',
-                    const TextStyle(color: Color(0xfff0f0f0), fontSize: 12),
-                  );
-                },
-              ),
-            ),
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       case 4: // Biaya per Kategori
-        return PieChart(
-          PieChartData(
+        return Stack(
+          children: [
+            PieChart(
+              PieChartData(
             sectionsSpace: 2,
             centerSpaceRadius: 40,
             sections: [
@@ -1310,37 +1633,62 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 color: const Color(0xffe53935),
                 title: '40%',
                 radius: 50,
+                titleStyle: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               PieChartSectionData(
                 value: 30,
                 color: const Color(0xfffdd835),
                 title: '30%',
                 radius: 50,
+                titleStyle: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               PieChartSectionData(
                 value: 20,
                 color: const Color(0xff3ecf8e),
                 title: '20%',
                 radius: 50,
+                titleStyle: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               PieChartSectionData(
                 value: 10,
                 color: const Color(0xff1e88e5),
                 title: '10%',
                 radius: 50,
+                titleStyle: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       case 5: // Populasi
-        return LineChart(
-          LineChartData(
+        return Stack(
+          children: [
+            LineChart(
+              LineChartData(
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
               horizontalInterval: 20,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: const Color(0xff57611f).withOpacity(0.3),
+                color: gridColor,
                 strokeWidth: 1,
               ),
             ),
@@ -1352,7 +1700,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       '${value.toInt()}',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
@@ -1365,13 +1713,28 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       'H${value.toInt()}',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
               ),
             ),
             borderData: FlBorderData(show: false),
+            lineTouchData: LineTouchData(
+              touchTooltipData: LineTouchTooltipData(
+                tooltipRoundedRadius: 8,
+                getTooltipColor: (touchedSpot) => tooltipBgColor,
+                getTooltipItems: (touchedSpots) {
+                  return touchedSpots.map((spot) {
+                    return LineTooltipItem(
+                      '${spot.y.toInt()} pohon',
+                      TextStyle(color: tooltipTextColor, fontSize: 12),
+                    );
+                  }).toList();
+                },
+              ),
+              handleBuiltInTouches: true,
+            ),
             lineBarsData: [
               LineChartBarData(
                 spots: const [
@@ -1384,38 +1747,25 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 isCurved: true,
                 color: const Color(0xff1e88e5),
                 barWidth: 3,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (spot, percent, barData, index) =>
-                    FlDotCirclePainter(radius: 4, color: const Color(0xff1e88e5), strokeWidth: 2),
-                ),
+                dotData: const FlDotData(show: true),
               ),
             ],
-            lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (touchedSpot) => const Color(0xff351515),
-                tooltipRoundedRadius: 8,
-                getTooltipItems: (touchedSpots) {
-                  return touchedSpots.map((spot) {
-                    return LineTooltipItem(
-                      '${spot.y.toInt()} pohon',
-                      const TextStyle(color: Color(0xfff0f0f0), fontSize: 12),
-                    );
-                  }).toList();
-                },
-              ),
-            ),
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       case 6: // Unsur Hara
-        return BarChart(
-          BarChartData(
+        return Stack(
+          children: [
+            BarChart(
+              BarChartData(
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
               horizontalInterval: 15,
               getDrawingHorizontalLine: (value) => FlLine(
-                color: const Color(0xff57611f).withOpacity(0.3),
+                color: gridColor,
                 strokeWidth: 1,
               ),
             ),
@@ -1427,7 +1777,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   getTitlesWidget: (value, meta) {
                     return Text(
                       '${value.toInt()}%',
-                      style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                      style: TextStyle(color: axisTextColor, fontSize: 10),
                     );
                   },
                 ),
@@ -1442,7 +1792,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                     if (value.toInt() >= 0 && value.toInt() < labels.length) {
                       return Text(
                         labels[value.toInt()],
-                        style: const TextStyle(color: Color(0xff9e9e9e), fontSize: 10),
+                        style: TextStyle(color: axisTextColor, fontSize: 10),
                       );
                     }
                     return const Text('');
@@ -1451,6 +1801,19 @@ class _BerandaScreenState extends State<BerandaScreen> {
               ),
             ),
             borderData: FlBorderData(show: false),
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                tooltipRoundedRadius: 8,
+                getTooltipColor: (group) => tooltipBgColor,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  return BarTooltipItem(
+                    '${rod.toY.toInt()}%',
+                    TextStyle(color: tooltipTextColor, fontWeight: FontWeight.bold),
+                  );
+                },
+              ),
+              handleBuiltInTouches: true,
+            ),
             barGroups: [
               BarChartGroupData(
                 x: 0,
@@ -1486,20 +1849,10 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 ],
               ),
             ],
-            barTouchData: BarTouchData(
-              enabled: true,
-              touchTooltipData: BarTouchTooltipData(
-                getTooltipColor: (group) => const Color(0xff351515),
-                tooltipRoundedRadius: 8,
-                getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                  return BarTooltipItem(
-                    '${rod.toY.toInt()}%',
-                    const TextStyle(color: Color(0xfff0f0f0), fontSize: 12),
-                  );
-                },
-              ),
-            ),
           ),
+        ),
+            _buildWatermark(),
+          ],
         );
       default:
         return const SizedBox.shrink();
@@ -1644,88 +1997,104 @@ class _BerandaScreenState extends State<BerandaScreen> {
         
         // Input fields based on tab
         if (_selectedGramHargaTab == 0) ...[
-          TextField(
-            controller: _rupiahController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Jumlah Uang (Rp)',
-              labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-              filled: true,
-              fillColor: const Color(0xff2a2a2a),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+          Tooltip(
+            message: 'Masukkan jumlah uang yang ingin dibelanjakan',
+            preferBelow: false,
+            child: TextField(
+              controller: _rupiahController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Jumlah Uang (Rp)',
+                labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                filled: true,
+                fillColor: const Color(0xff2a2a2a),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                ),
+                suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-              ),
-              suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
+              style: const TextStyle(color: Color(0xffe0e0e0)),
             ),
-            style: const TextStyle(color: Color(0xffe0e0e0)),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _hargaPerKgController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Harga per Kg (Rp/kg)',
-              labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-              filled: true,
-              fillColor: const Color(0xff2a2a2a),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+          Tooltip(
+            message: 'Masukkan harga per kilogram produk',
+            preferBelow: false,
+            child: TextField(
+              controller: _hargaPerKgController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Harga per Kg (Rp/kg)',
+                labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                filled: true,
+                fillColor: const Color(0xff2a2a2a),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                ),
+                suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-              ),
-              suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
+              style: const TextStyle(color: Color(0xffe0e0e0)),
             ),
-            style: const TextStyle(color: Color(0xffe0e0e0)),
           ),
         ] else ...[
-          TextField(
-            controller: _gramController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Jumlah Gram',
-              labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-              filled: true,
-              fillColor: const Color(0xff2a2a2a),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+          Tooltip(
+            message: 'Masukkan jumlah gram yang ingin dikonversi',
+            preferBelow: false,
+            child: TextField(
+              controller: _gramController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Jumlah Gram',
+                labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                filled: true,
+                fillColor: const Color(0xff2a2a2a),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                ),
+                suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-              ),
-              suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
+              style: const TextStyle(color: Color(0xffe0e0e0)),
             ),
-            style: const TextStyle(color: Color(0xffe0e0e0)),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _hargaPerKgController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Harga per Kg (Rp/kg)',
-              labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-              filled: true,
-              fillColor: const Color(0xff2a2a2a),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+          Tooltip(
+            message: 'Masukkan harga per kilogram produk',
+            preferBelow: false,
+            child: TextField(
+              controller: _hargaPerKgController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Harga per Kg (Rp/kg)',
+                labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                filled: true,
+                fillColor: const Color(0xff2a2a2a),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                ),
+                suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-              ),
-              suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
+              style: const TextStyle(color: Color(0xffe0e0e0)),
             ),
-            style: const TextStyle(color: Color(0xffe0e0e0)),
           ),
         ],
         
@@ -1760,25 +2129,29 @@ class _BerandaScreenState extends State<BerandaScreen> {
         Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: _targetCampuranController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Target Campuran (gram)',
-                  labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-                  filled: true,
-                  fillColor: const Color(0xff2a2a2a),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+              child: Tooltip(
+                message: 'Masukkan target berat campuran pupuk dalam gram',
+                preferBelow: false,
+                child: TextField(
+                  controller: _targetCampuranController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Target Campuran (gram)',
+                    labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                    filled: true,
+                    fillColor: const Color(0xff2a2a2a),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                    ),
+                    suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-                  ),
-                  suffixIcon: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
+                  style: const TextStyle(color: Color(0xffe0e0e0)),
                 ),
-                style: const TextStyle(color: Color(0xffe0e0e0)),
               ),
             ),
             const SizedBox(width: 12),
@@ -1828,101 +2201,109 @@ class _BerandaScreenState extends State<BerandaScreen> {
               children: [
                 Expanded(
                   flex: 2,
-                  child: Autocomplete<String>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return _mockProdukList.map((p) => p['nama'] as String);
-                      }
-                      return _mockProdukList
-                          .where((p) => (p['nama'] as String).toLowerCase()
-                              .contains(textEditingValue.text.toLowerCase()))
-                          .map((p) => p['nama'] as String);
-                    },
-                    onSelected: (String selection) {
-                      setState(() {
-                        row['produk'] = selection;
-                        _hasilUnsurHara = '';
-                      });
-                    },
-                    fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-                      row['textEditingController'] = textEditingController;
-                      return TextField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        decoration: InputDecoration(
-                          labelText: 'Produk',
-                          labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-                          filled: true,
-                          fillColor: const Color(0xff2a2a2a),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                  child: Tooltip(
+                    message: 'Ketik nama produk atau pilih dari daftar',
+                    preferBelow: false,
+                    child: Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return _mockProdukList.map((p) => p['nama'] as String);
+                        }
+                        return _mockProdukList
+                            .where((p) => (p['nama'] as String).toLowerCase()
+                                .contains(textEditingValue.text.toLowerCase()))
+                            .map((p) => p['nama'] as String);
+                      },
+                      onSelected: (String selection) {
+                        setState(() {
+                          row['produk'] = selection;
+                          _hasilUnsurHara = '';
+                        });
+                      },
+                      fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+                        row['textEditingController'] = textEditingController;
+                        return TextField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          decoration: InputDecoration(
+                            labelText: 'Produk',
+                            labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                            filled: true,
+                            fillColor: const Color(0xff2a2a2a),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                            ),
+                            suffixIcon: GestureDetector(
+                              onLongPress: () {
+                                if (row['produk'] != null) {
+                                  final produk = _mockProdukList.firstWhere((p) => p['nama'] == row['produk']);
+                                  String tooltip = 'Unsur Hara:\n';
+                                  tooltip += 'N: ${((produk['n_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'P: ${((produk['p_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'K: ${((produk['k_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Ca: ${((produk['ca_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Mg: ${((produk['mg_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'S: ${((produk['s_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Fe: ${((produk['fe_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Mn: ${((produk['mn_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Zn: ${((produk['zn_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Cu: ${((produk['cu_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'B: ${((produk['b_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Mo: ${((produk['mo_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Cl: ${((produk['cl_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
+                                  tooltip += 'Na: ${((produk['na_persen'] as int) / 10000).toStringAsFixed(1)}%';
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(tooltip),
+                                      backgroundColor: const Color(0xff3ecf8e),
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-                          ),
-                          suffixIcon: GestureDetector(
-                            onLongPress: () {
-                              if (row['produk'] != null) {
-                                final produk = _mockProdukList.firstWhere((p) => p['nama'] == row['produk']);
-                                String tooltip = 'Unsur Hara:\n';
-                                tooltip += 'N: ${((produk['n_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'P: ${((produk['p_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'K: ${((produk['k_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Ca: ${((produk['ca_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Mg: ${((produk['mg_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'S: ${((produk['s_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Fe: ${((produk['fe_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Mn: ${((produk['mn_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Zn: ${((produk['zn_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Cu: ${((produk['cu_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'B: ${((produk['b_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Mo: ${((produk['mo_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Cl: ${((produk['cl_persen'] as int) / 10000).toStringAsFixed(1)}%\n';
-                                tooltip += 'Na: ${((produk['na_persen'] as int) / 10000).toStringAsFixed(1)}%';
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(tooltip),
-                                    backgroundColor: const Color(0xff3ecf8e),
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
-                              }
-                            },
-                            child: const Icon(Icons.info_outline, color: Color(0xff3ecf8e), size: 18),
-                          ),
-                        ),
-                        style: const TextStyle(color: Color(0xffe0e0e0)),
-                      );
-                    },
+                          style: const TextStyle(color: Color(0xffe0e0e0)),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: TextField(
-                    controller: row['gramController'] as TextEditingController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Dosis (gram)',
-                      labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
-                      filled: true,
-                      fillColor: const Color(0xff2a2a2a),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                  child: Tooltip(
+                    message: 'Masukkan dosis pupuk dalam gram',
+                    preferBelow: false,
+                    child: TextField(
+                      controller: row['gramController'] as TextEditingController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Dosis (gram)',
+                        labelStyle: const TextStyle(color: Color(0xff9e9e9e)),
+                        filled: true,
+                        fillColor: const Color(0xff2a2a2a),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xff3a3a3a)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xff3ecf8e)),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xff3ecf8e)),
-                      ),
+                      style: const TextStyle(color: Color(0xffe0e0e0)),
+                      onChanged: (_) {
+                        setState(() {
+                          _hasilUnsurHara = '';
+                        });
+                      },
                     ),
-                    style: const TextStyle(color: Color(0xffe0e0e0)),
-                    onChanged: (_) {
-                      setState(() {
-                        _hasilUnsurHara = '';
-                      });
-                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1950,13 +2331,18 @@ class _BerandaScreenState extends State<BerandaScreen> {
             Expanded(
               child: Tooltip(
                 message: 'Tambah baris produk baru',
-                child: ElevatedButton.icon(
-                  onPressed: _addPupukRow,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Tambah Kolom'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff3ecf8e),
-                    foregroundColor: const Color(0xff121212),
+                preferBelow: false,
+                child: AnimatedBorderContainer(
+                  onTap: _addPupukRow,
+                  borderRadius: BorderRadius.circular(8),
+                  child: ElevatedButton.icon(
+                    onPressed: _addPupukRow,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Tambah Kolom'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff3ecf8e),
+                      foregroundColor: const Color(0xff121212),
+                    ),
                   ),
                 ),
               ),
@@ -1965,17 +2351,26 @@ class _BerandaScreenState extends State<BerandaScreen> {
             Expanded(
               child: Tooltip(
                 message: 'Kelola katalog produk pupuk',
-                child: ElevatedButton.icon(
-                  onPressed: () {
+                preferBelow: false,
+                child: AnimatedBorderContainer(
+                  onTap: () {
                     setState(() {
                       _showKatalogPupuk = !_showKatalogPupuk;
                     });
                   },
-                  icon: const Icon(Icons.list),
-                  label: const Text('Kelola Katalog'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff2e2e2e),
-                    foregroundColor: const Color(0xffe0e0e0),
+                  borderRadius: BorderRadius.circular(8),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _showKatalogPupuk = !_showKatalogPupuk;
+                      });
+                    },
+                    icon: const Icon(Icons.list),
+                    label: const Text('Kelola Katalog'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff2e2e2e),
+                      foregroundColor: const Color(0xffe0e0e0),
+                    ),
                   ),
                 ),
               ),
@@ -2035,14 +2430,19 @@ class _BerandaScreenState extends State<BerandaScreen> {
               flex: 1,
               child: Tooltip(
                 message: 'Reset nilai gram saja, nama produk tetap',
-                child: OutlinedButton(
-                  onPressed: _resetPupukGramasi,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xff9e9e9e),
-                    side: const BorderSide(color: Color(0xff57611f)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                preferBelow: false,
+                child: AnimatedBorderContainer(
+                  onTap: _resetPupukGramasi,
+                  borderRadius: BorderRadius.circular(8),
+                  child: OutlinedButton(
+                    onPressed: _resetPupukGramasi,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xff9e9e9e),
+                      side: const BorderSide(color: Color(0xff57611f)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('Reset'),
                   ),
-                  child: const Text('Reset'),
                 ),
               ),
             ),
@@ -2051,14 +2451,19 @@ class _BerandaScreenState extends State<BerandaScreen> {
               flex: 3,
               child: Tooltip(
                 message: 'Hitung total unsur hara dari campuran',
-                child: ElevatedButton(
-                  onPressed: _hitungUnsurHara,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff3ecf8e),
-                    foregroundColor: const Color(0xff121212),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                preferBelow: false,
+                child: AnimatedBorderContainer(
+                  onTap: _hitungUnsurHara,
+                  borderRadius: BorderRadius.circular(8),
+                  child: ElevatedButton(
+                    onPressed: _hitungUnsurHara,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff3ecf8e),
+                      foregroundColor: const Color(0xff121212),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('Hitung Unsur'),
                   ),
-                  child: const Text('Hitung Unsur'),
                 ),
               ),
             ),
